@@ -15,7 +15,12 @@ keep their blob guards). Layout:
     Notice-qca-atheros.txt       Qualcomm Atheros notice (WCN7860)
     root/usr/lib/firmware/updates/...                      the firmware files (~130 MB; largest file adsp.mbn ~41 MB, below GitHub limits)
     root/usr/share/qcom/kaanapali/OnePlus/iceland/...      the sensor hub's file tree (without the registry)
+    root/etc/iceland/thermal-model.json                    stock's shell-temperature model for iceland-thermal
+                                                           (decoded, generic; from 11.A.38-3)
 
 Every file is byte-identical to what `iceland-fw-extract` (iceland-mainline) writes from a tablet's own stock
-partitions; `sha256sum -c` against MANIFEST.tsv proves it. Unit-specific data (the sensor calibration registry from
+partitions; `sha256sum -c` against MANIFEST.tsv proves it. The one exception is
+`/etc/iceland/thermal-model.json` (since 11.A.38-3): stock's thermal model, decoded from the vendor's
+encrypted configuration, generic and the same on every unit; the encrypted inputs, the key and the decoder are not
+published (NOTICE.md). Unit-specific data (the sensor calibration registry from
 `persist`, Bluetooth / Wi-Fi addresses) is not here: the installer still extracts it from the tablet itself.
