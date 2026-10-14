@@ -11,7 +11,7 @@ redistributed UNMODIFIED, with these documented, byte-exact transformations only
 - `socinfo/*`: SoC identification values (stock `/sys/devices/soc0`), not vendor code.
 
 One file is not a byte copy: `/etc/iceland/thermal-model.json`, stock's shell-temperature model (the input of
-iceland-thermal), decoded from the vendor's encrypted thermal configuration (horae) of 11.A.38. It is generic:
+iceland-thermal), decoded from the vendor's encrypted thermal configuration of 11.A.38. It is generic:
 identical on every unit (no serial, address or calibration field); only the models, the gear table and the status
 table are kept, as JSON. The encrypted configuration files, the vendor's program, its key and the decoding tool are
 not published (`EXCLUDED.tsv`).
