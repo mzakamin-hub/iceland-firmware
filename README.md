@@ -12,9 +12,9 @@ taken from the stock software release 11.A.38 and packaged for Fedora as `icelan
 
 The 11.A.38-3 file is stock's shell-temperature model for `iceland-thermal`. It was decoded from the vendor's encrypted
 thermal configuration of 11.A.38. It is generic and the same on every unit (no serial, address or calibration value).
-The owner decided to publish it on 12 Oct 2026. The firmware files themselves are the same in -2 and -3.
+It is published since 12 Oct 2026. The firmware files themselves are the same in -2 and -3.
 
-The tablet runs 11.A.38-3: it is part of the B149 image installed on 13 Oct 2026.
+11.A.38-3 is the release in the project's Fedora 44 install image.
 
 ## Contents
 
@@ -33,7 +33,7 @@ The tablet runs 11.A.38-3: it is part of the B149 image installed on 13 Oct 2026
 - `superturtle-compare.tsv`: the file-by-file comparison with that third-party repository.
 - `NOTICE.md` and `Notice-qca-atheros.txt`: the notices (see below).
 
-Every file is byte-identical to what `iceland-fw-extract` in [iceland-mainline](https://github.com/mzakamin-hub/iceland-mainline)
+Every file is byte-identical to what the project's extractor (`iceland-fw-extract`, not published)
 writes from a tablet's own stock partitions. `sha256sum -c` against `MANIFEST.tsv` proves it. Before a third-party copy
 of any file is used, compare its sha256 with `MANIFEST.tsv`.
 
