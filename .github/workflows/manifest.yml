@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# On every push and pull request:
+#   manifest   every published file = its MANIFEST.tsv line (size, sha256), no file without a line, no excluded
+#              (unit-specific) path, the notice files present and shipped as %license
+#   rpm        rpmbuild -ba of iceland-firmware.spec in a Fedora 44 container (its %check verifies the manifest again)
+name: manifest
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manifest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manifest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Manifest and notices
+        run: python3 .github/scripts/check-manifest.py
+
+  rpm:
+    runs-on: ubuntu-24.04
+    container: fedora:44
+    timeout-minutes: 30
+    steps:
+      - name: Install rpm tools
+        run: dnf -y -q install rpm-build python3 tar gzip
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: rpmbuild -ba iceland-firmware.spec
+        run: |
+          v=$(rpmspec -q --srpm --qf '%{version}\n' iceland-firmware.spec)
+          top=$GITHUB_WORKSPACE/_out/rpmbuild; mkdir -p "$top/SOURCES"
+          tar --exclude=./.git --exclude=./_out --transform "s,^\.,iceland-firmware-$v," \
+            -czf "$top/SOURCES/iceland-firmware-$v.tar.gz" .
+          rpmbuild --define "_topdir $top" --define "dist .fc44" -ba iceland-firmware.spec
+          rpm -qip "$top"/RPMS/noarch/iceland-firmware-*.rpm
+          echo "files: $(rpm -qpl "$top"/RPMS/noarch/iceland-firmware-*.rpm | wc -l)"
