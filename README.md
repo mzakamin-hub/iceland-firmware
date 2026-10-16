@@ -7,7 +7,8 @@ taken from the stock software release 11.A.38 and packaged for Fedora as `icelan
 
 | Version | Tag / commit | What changed | RPM sha256 prefix |
 |---|---|---|---|
-| **11.A.38-5** (current) | `11.A.38-5` / `f6fc0cd` | adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 in `/usr/lib/firmware/iceland-gpu-stock/qcom` (used with `firmware_class.path`, see below) | `8e430110` |
+| **11.A.38-6** (current) | `11.A.38-6` / see the release | adds the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094 (as SuperTurtleDev / the TB323FU port) in `/usr/lib/firmware/iceland-gpu-vendor533/qcom`, used with GPU preemption on (see below) | see the release |
+| 11.A.38-5 | `11.A.38-5` / `f6fc0cd` | adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 in `/usr/lib/firmware/iceland-gpu-stock/qcom` (used with `firmware_class.path`, see below) | `8e430110` |
 | 11.A.38-4 | `11.A.38-4` / `5305629` | adds the sensor hub registry (352 files, `sensors/registry`, generic per the owner's decision of 15 Oct 2026) | `fb86f5fa` |
 | 11.A.38-3 | `11.A.38-3` / `70ea8f1` | adds `/etc/iceland/thermal-model.json` (sha256 `4f476a7d4b0b9c5266aacd83d430f454e6175922f0c1c21f9f9dfd0a36f1debd`) | `297669a0` |
 | 11.A.38-2 | `11.A.38-2` / `c40c33e` | the 278 generic firmware files, the sensor hub tree with its permissions (root:fastrpc) | `14833f71` |
@@ -16,14 +17,14 @@ The 11.A.38-3 file is stock's shell-temperature model for `iceland-thermal`. It 
 thermal configuration of 11.A.38. It is generic and the same on every unit (no serial, address or calibration value).
 It is published since 12 Oct 2026. The firmware files themselves are the same in -2 and -3.
 
-11.A.38-5 is the release for the installed Fedora 44 system (with `iceland-device` 0.28-19) and the generic install
-image from B150 on; 11.A.38-3 and -4 are earlier ones.
+11.A.38-6 is the release for the installed Fedora 44 system (with `iceland-device` 0.28-20) and the generic install
+image from B150 on; 11.A.38-3 to -5 are earlier ones.
 The registry files of 11.A.38-4 are `%config(noreplace)`: a registry the installer's extractor wrote from a unit's own
 persist partition is kept.
 
 ## Contents
 
-- `root/`: the files, laid out as they are installed. 633 files, 129,561,902 bytes (about 124 MiB) in all. The largest
+- `root/`: the files, laid out as they are installed. 635 files, 129,793,088 bytes (about 124 MiB) in all. The largest
   is `adsp.mbn` (40,814,792 bytes):
   - `/usr/lib/firmware/updates/`: the ADSP and CDSP images, the GPU zap shader, the video (VPU) firmware, the
     WCN7860 Wi-Fi and Bluetooth firmware and board files, and the Novatek touch firmware;
@@ -31,6 +32,8 @@ persist partition is kept.
     the audio calibration database) and, since 11.A.38-4, the sensor hub registry (`sensors/registry`, 352 files);
   - `/usr/lib/firmware/iceland-gpu-stock/qcom/`: stock's GPU GMU firmware (`gen80200_gmu.bin` v5.3.39) and SQE
     microcode (`gen80200_sqe.fw` 0x103), since 11.A.38-5 (see below);
+  - `/usr/lib/firmware/iceland-gpu-vendor533/qcom/`: the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094,
+    since 11.A.38-6 (third-party copies, see below);
   - `/etc/iceland/thermal-model.json`: the thermal model (since 11.A.38-3).
 - `iceland-firmware.spec`: the RPM spec. It has no scriptlets and no services. Only the `fastrpc` group is required.
 - `MANIFEST.tsv`: one row per packaged file: path, sha256, bytes, class, the stock source (partition and path in
@@ -40,8 +43,8 @@ persist partition is kept.
 - `superturtle-compare.tsv`: the file-by-file comparison with that third-party repository.
 - `NOTICE.md` and `Notice-qca-atheros.txt`: the notices (see below).
 
-Every file is byte-identical to what the project's extractor (`iceland-fw-extract`, not published)
-writes from a tablet's own stock partitions. `sha256sum -c` against `MANIFEST.tsv` proves it. Before a third-party copy
+Every file except the vendor GPU pair of 11.A.38-6 is byte-identical to what the project's extractor
+(`iceland-fw-extract`, not published) writes from a tablet's own stock partitions. `sha256sum -c` against `MANIFEST.tsv` proves it. Before a third-party copy
 of any file is used, compare its sha256 with `MANIFEST.tsv`.
 
 ## Stock's GPU firmware (11.A.38-5)
@@ -56,6 +59,22 @@ not search by default; linux-firmware's files are not replaced. The kernel param
 `firmware_class.path=/usr/lib/firmware/iceland-gpu-stock` makes the kernel look there first. `iceland-device`
 0.28-19 sets it (switch `GPU_FW=stock|linux-firmware` in `/etc/iceland/boot.conf`) and puts the pair into the
 initramfs.
+
+## The vendor GPU firmware (11.A.38-6)
+
+SuperTurtleDev's port and the Lenovo TB323FU port (the same Snapdragon 8 Elite Gen 5) run the GPU with the vendor
+pair GMU v5.3.33 / SQE 0x094 and GPU preemption on. Stock 11.A.38 does not ship this pair; the files here are
+third-party copies, byte-identical in SuperTurtleDev/iceland-mainline-kernel-firmware d0c0f18,
+map220v/iceland-firmware da6a19a and the TB323FU manifest (ZUI 18.0.12.104; joonhoekim/tb323fu-linux 43ee432);
+`MANIFEST.tsv` has their sha256. In the RAM rehearsal P2 (16 Oct 2026, kernel q89m, `msm.enable_preemption=1`)
+the GPU made 48356 preemption ring switches with 0 fenced-write failures, 0 preemption timeouts and 0 faults or
+recoveries; Chromium WebGL ran without a GPU-process crash, vkmark 22112. Stock's pair with preemption on reset the
+tablet early in boot (P1), so stock's pair is used only with preemption off.
+
+The pair is installed in `/usr/lib/firmware/iceland-gpu-vendor533/qcom/`, also off the kernel's default search
+path. `iceland-device` 0.28-20 selects it by default (`GPU_FW=vendor533` in `/etc/iceland/boot.conf`:
+`firmware_class.path=/usr/lib/firmware/iceland-gpu-vendor533` and `msm.enable_preemption=1`) and puts both pairs
+into the initramfs.
 
 ## Not in this repository
 

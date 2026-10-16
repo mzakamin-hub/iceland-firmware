@@ -4,6 +4,10 @@
 # are byte-identical to the extracted ones (MANIFEST.tsv = the extraction's sha256), rpm replaces an unowned file
 # with the same content in place, so nothing is ever absent. Unit-specific data (the Bluetooth address, the
 # extraction record) is NOT in this package (EXCLUDED.tsv) and stays extractor-written.
+# 11.A.38-6 adds the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094 (the pair SuperTurtleDev and the TB323FU
+# port run) in /usr/lib/firmware/iceland-gpu-vendor533/qcom, also off the default search path:
+# firmware_class.path=/usr/lib/firmware/iceland-gpu-vendor533 selects it (iceland-device >= 0.28-20, with GPU
+# preemption on).
 # 11.A.38-5 adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 (gen80200) in their own directory,
 # /usr/lib/firmware/iceland-gpu-stock/qcom, which the kernel does NOT search by default: Fedora's linux-firmware
 # copies stay untouched and in use unless the kernel command line has
@@ -30,7 +34,7 @@
 
 Name:           iceland-firmware
 Version:        11.A.38
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Generic firmware of the OnePlus Pad 4 (Snapdragon 8 Elite Gen 5 / kaanapali)
 License:        LicenseRef-Callaway-Redistributable-no-modification-permitted
 URL:            https://github.com/mzakamin-hub/iceland-firmware
@@ -57,6 +61,9 @@ Also the sensor hub registry of stock 11.A.38 (generic; configuration files, a u
 Also stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 (gen80200) in /usr/lib/firmware/iceland-gpu-stock,
 a directory the kernel does NOT search by default: Fedora's linux-firmware copies (v5.3.23 / 0x088) stay in use
 unless the command line selects stock's pair with firmware_class.path=/usr/lib/firmware/iceland-gpu-stock.
+Also the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094 that SuperTurtleDev and the TB323FU port run, in
+/usr/lib/firmware/iceland-gpu-vendor533, likewise used only with
+firmware_class.path=/usr/lib/firmware/iceland-gpu-vendor533.
 Unit-specific data (Bluetooth / Wi-Fi addresses) is not included.
 
 %prep
@@ -98,6 +105,10 @@ test "$(find ./usr/share/qcom/kaanapali/OnePlus/iceland/sensors/registry -type f
 test "$(find ./usr/lib/firmware/iceland-gpu-stock -type f | wc -l)" = 2
 echo '7e2f9381dbae6ba3eda632e51e07377a90a9549e2e164a033255ab4ecd431ba8  ./usr/lib/firmware/iceland-gpu-stock/qcom/gen80200_gmu.bin' | sha256sum --quiet -c -
 echo '1f1c7bae8050a9910902ec42b3d741ff3a68bc21114dea966a502ade2a9b606d  ./usr/lib/firmware/iceland-gpu-stock/qcom/gen80200_sqe.fw' | sha256sum --quiet -c -
+# the vendor GPU pair (11.A.38-6): exactly two files in its own directory
+test "$(find ./usr/lib/firmware/iceland-gpu-vendor533 -type f | wc -l)" = 2
+echo '06f4484fa06f91638aa4ae2412051bcddffdad69a7e2f83849c72412e6daa44d  ./usr/lib/firmware/iceland-gpu-vendor533/qcom/gen80200_gmu.bin' | sha256sum --quiet -c -
+echo 'e2d4e74282f50e40788b83b9ba4a5f5894c7975ed356c03a0161372d78f12932  ./usr/lib/firmware/iceland-gpu-vendor533/qcom/gen80200_sqe.fw' | sha256sum --quiet -c -
 test ! -e ./usr/lib/firmware/qcom/gen80200_gmu.bin && test ! -e ./usr/lib/firmware/qcom/gen80200_sqe.fw
 # the thermal model: valid JSON with the five shell models; nothing else under /etc
 python3 -c 'import json, sys; d = json.load(open(sys.argv[1])); sys.exit(0 if len(d.get("models", [])) == 5 else 1)' ./etc/iceland/thermal-model.json
@@ -108,6 +119,18 @@ test "$(find ./etc -type f | wc -l)" = 1
 %doc README.md MANIFEST.tsv EXCLUDED.tsv
 
 %changelog
+* Fri Oct 16 2026 mzak <mzak.amin@gmail.com> - 11.A.38-6
+- Add the vendor GPU GMU firmware (gen80200_gmu.bin v5.3.33, sha256 06f4484f) and SQE microcode
+  (gen80200_sqe.fw 0x094, sha256 e2d4e742) under /usr/lib/firmware/iceland-gpu-vendor533/qcom, off the kernel's
+  default search path; firmware_class.path=/usr/lib/firmware/iceland-gpu-vendor533 (iceland-device >= 0.28-20)
+  selects them. Not part of our 11.A.38 extraction: third-party copies, byte-identical in SuperTurtleDev
+  d0c0f18, map220v da6a19a and the Lenovo TB323FU ZUI 18.0.12.104 manifest (joonhoekim/tb323fu-linux 43ee432).
+  The pair SuperTurtleDev and the TB323FU port run with GPU preemption on. Tested in the RAM rehearsal P2
+  (16 Oct 2026, kernel q89m, msm.enable_preemption=1): 48356 preemption ring switches, 0 fenced-write failures,
+  0 preemption timeouts, 0 GPU faults / recoveries, Chromium WebGL without a GPU-process crash, vkmark 22112.
+  Stock's pair (iceland-gpu-stock) is kept unchanged. Generic GPU blobs, the owner's decision of 16 Oct 2026.
+  No other file changed.
+
 * Fri Oct 16 2026 mzak <mzak.amin@gmail.com> - 11.A.38-5
 - Add stock's GPU GMU firmware (gen80200_gmu.bin v5.3.39, sha256 7e2f9381) and SQE microcode (gen80200_sqe.fw
   0x103, sha256 1f1c7bae) of 11.A.38, byte copies from vendor_a:/firmware, under

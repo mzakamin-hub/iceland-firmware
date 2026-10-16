@@ -22,6 +22,14 @@ identical on every unit (no serial, address or calibration field); only the mode
 table are kept, as JSON. The encrypted configuration files, the vendor's program, its key and the decoding tool are
 not published (`EXCLUDED.tsv`).
 
+Since 11.A.38-6 two files are not from 11.A.38: `/usr/lib/firmware/iceland-gpu-vendor533/qcom/gen80200_gmu.bin`
+(GMU v5.3.33) and `gen80200_sqe.fw` (SQE 0x094), Qualcomm Technologies, Inc. Adreno 840 microcode as shipped in
+another kaanapali vendor image (Lenovo TB323FU, ZUI 18.0.12.104). They are unmodified copies, byte-identical in
+SuperTurtleDev/iceland-mainline-kernel-firmware d0c0f18, map220v/iceland-firmware da6a19a and the TB323FU manifest
+of joonhoekim/tb323fu-linux 43ee432; no licence or notice text accompanies them in any of these sources. The kernel
+uses them only when its command line names their directory
+(`firmware_class.path=/usr/lib/firmware/iceland-gpu-vendor533`).
+
 All rights remain with their owners. No licence is granted beyond the right to use the files with OnePlus Pad 4 hardware
 as the owners permit. `Notice-qca-atheros.txt` is Qualcomm Atheros' notice file for the WCN7860 Wi-Fi firmware
 (copy from SuperTurtleDev/iceland-mainline-kernel-firmware d0c0f18, sha256 in MANIFEST/README).
