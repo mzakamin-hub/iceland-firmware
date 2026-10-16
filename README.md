@@ -7,7 +7,7 @@ taken from the stock software release 11.A.38 and packaged for Fedora as `icelan
 
 | Version | Tag / commit | What changed | RPM sha256 prefix |
 |---|---|---|---|
-| **11.A.38-5** (current) | `11.A.38-5` / see the release | adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 in `/usr/lib/firmware/iceland-gpu-stock/qcom` (used with `firmware_class.path`, see below) | see the release |
+| **11.A.38-5** (current) | `11.A.38-5` / `f6fc0cd` | adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 in `/usr/lib/firmware/iceland-gpu-stock/qcom` (used with `firmware_class.path`, see below) | `8e430110` |
 | 11.A.38-4 | `11.A.38-4` / `5305629` | adds the sensor hub registry (352 files, `sensors/registry`, generic per the owner's decision of 15 Oct 2026) | `fb86f5fa` |
 | 11.A.38-3 | `11.A.38-3` / `70ea8f1` | adds `/etc/iceland/thermal-model.json` (sha256 `4f476a7d4b0b9c5266aacd83d430f454e6175922f0c1c21f9f9dfd0a36f1debd`) | `297669a0` |
 | 11.A.38-2 | `11.A.38-2` / `c40c33e` | the 278 generic firmware files, the sensor hub tree with its permissions (root:fastrpc) | `14833f71` |
