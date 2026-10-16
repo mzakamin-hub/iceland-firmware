@@ -7,7 +7,7 @@ taken from the stock software release 11.A.38 and packaged for Fedora as `icelan
 
 | Version | Tag / commit | What changed | RPM sha256 prefix |
 |---|---|---|---|
-| **11.A.38-6** (current) | `11.A.38-6` / see the release | adds the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094 (as SuperTurtleDev / the TB323FU port) in `/usr/lib/firmware/iceland-gpu-vendor533/qcom`, used with GPU preemption on (see below) | see the release |
+| **11.A.38-6** (current) | `11.A.38-6` / `77a14c2` | adds the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094 (as SuperTurtleDev / the TB323FU port) in `/usr/lib/firmware/iceland-gpu-vendor533/qcom`, used with GPU preemption on (see below) | `f8e202b3` |
 | 11.A.38-5 | `11.A.38-5` / `f6fc0cd` | adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 in `/usr/lib/firmware/iceland-gpu-stock/qcom` (used with `firmware_class.path`, see below) | `8e430110` |
 | 11.A.38-4 | `11.A.38-4` / `5305629` | adds the sensor hub registry (352 files, `sensors/registry`, generic per the owner's decision of 15 Oct 2026) | `fb86f5fa` |
 | 11.A.38-3 | `11.A.38-3` / `70ea8f1` | adds `/etc/iceland/thermal-model.json` (sha256 `4f476a7d4b0b9c5266aacd83d430f454e6175922f0c1c21f9f9dfd0a36f1debd`) | `297669a0` |
