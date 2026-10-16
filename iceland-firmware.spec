@@ -4,6 +4,11 @@
 # are byte-identical to the extracted ones (MANIFEST.tsv = the extraction's sha256), rpm replaces an unowned file
 # with the same content in place, so nothing is ever absent. Unit-specific data (the Bluetooth address, the
 # extraction record) is NOT in this package (EXCLUDED.tsv) and stays extractor-written.
+# 11.A.38-5 adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 (gen80200) in their own directory,
+# /usr/lib/firmware/iceland-gpu-stock/qcom, which the kernel does NOT search by default: Fedora's linux-firmware
+# copies stay untouched and in use unless the kernel command line has
+# firmware_class.path=/usr/lib/firmware/iceland-gpu-stock (iceland-device >= 0.28-19 sets it, and puts the pair into
+# the initramfs; it also rebuilds the initramfs, so this package still has no scriptlet).
 # 11.A.38-4 adds the sensor hub registry (persist:/sensors/registry/registry, 352 files): generic by the owner's
 # decision of 15 Oct 2026. Its files are %config(noreplace): a registry the extractor wrote from a unit's own persist
 # partition stays in place (rpm writes .rpmnew next to a differing file) and rpm -V reports it as configuration.
@@ -25,7 +30,7 @@
 
 Name:           iceland-firmware
 Version:        11.A.38
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Generic firmware of the OnePlus Pad 4 (Snapdragon 8 Elite Gen 5 / kaanapali)
 License:        LicenseRef-Callaway-Redistributable-no-modification-permitted
 URL:            https://github.com/mzakamin-hub/iceland-firmware
@@ -49,6 +54,9 @@ the iceland-device package expect them. MANIFEST.tsv lists each file's stock sou
 Also stock's shell-temperature model for iceland-thermal (/etc/iceland/thermal-model.json), decoded from the
 vendor's thermal configuration: generic, the same on every unit.
 Also the sensor hub registry of stock 11.A.38 (generic; configuration files, a unit's own registry is kept).
+Also stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 (gen80200) in /usr/lib/firmware/iceland-gpu-stock,
+a directory the kernel does NOT search by default: Fedora's linux-firmware copies (v5.3.23 / 0x088) stay in use
+unless the command line selects stock's pair with firmware_class.path=/usr/lib/firmware/iceland-gpu-stock.
 Unit-specific data (Bluetooth / Wi-Fi addresses) is not included.
 
 %prep
@@ -86,6 +94,11 @@ cd %{buildroot}
 awk -F'\t' '!/^#/ && NF >= 2 { print $2 "  ." $1 }' %{_builddir}/iceland-firmware-%{version}/MANIFEST.tsv | sha256sum --quiet -c -
 test "$(find . -type f | wc -l)" = "$(grep -c -v '^#' %{_builddir}/iceland-firmware-%{version}/MANIFEST.tsv)"
 test "$(find ./usr/share/qcom/kaanapali/OnePlus/iceland/sensors/registry -type f | wc -l)" = 352
+# stock's GPU pair: exactly the GMU and the SQE file in their own directory, nothing of linux-firmware's names elsewhere
+test "$(find ./usr/lib/firmware/iceland-gpu-stock -type f | wc -l)" = 2
+echo '7e2f9381dbae6ba3eda632e51e07377a90a9549e2e164a033255ab4ecd431ba8  ./usr/lib/firmware/iceland-gpu-stock/qcom/gen80200_gmu.bin' | sha256sum --quiet -c -
+echo '1f1c7bae8050a9910902ec42b3d741ff3a68bc21114dea966a502ade2a9b606d  ./usr/lib/firmware/iceland-gpu-stock/qcom/gen80200_sqe.fw' | sha256sum --quiet -c -
+test ! -e ./usr/lib/firmware/qcom/gen80200_gmu.bin && test ! -e ./usr/lib/firmware/qcom/gen80200_sqe.fw
 # the thermal model: valid JSON with the five shell models; nothing else under /etc
 python3 -c 'import json, sys; d = json.load(open(sys.argv[1])); sys.exit(0 if len(d.get("models", [])) == 5 else 1)' ./etc/iceland/thermal-model.json
 test "$(find ./etc -type f | wc -l)" = 1
@@ -95,6 +108,16 @@ test "$(find ./etc -type f | wc -l)" = 1
 %doc README.md MANIFEST.tsv EXCLUDED.tsv
 
 %changelog
+* Fri Oct 16 2026 mzak <mzak.amin@gmail.com> - 11.A.38-5
+- Add stock's GPU GMU firmware (gen80200_gmu.bin v5.3.39, sha256 7e2f9381) and SQE microcode (gen80200_sqe.fw
+  0x103, sha256 1f1c7bae) of 11.A.38, byte copies from vendor_a:/firmware, under
+  /usr/lib/firmware/iceland-gpu-stock/qcom: NOT on the kernel's default firmware search path, so linux-firmware's
+  v5.3.23 / 0x088 stay untouched; the kernel parameter firmware_class.path=/usr/lib/firmware/iceland-gpu-stock
+  (set by iceland-device >= 0.28-19) selects stock's pair: that directory is searched first and holds only these
+  two files. Tested in the RAM rehearsal R4 (16 Oct 2026, kernel q89m, GPU preemption off): clean GPU start,
+  0 GMU errors, 0 fenced writes, WebGL 180 s without a GPU-process crash. Generic GPU blobs, published by the
+  owner's decision of 16 Oct 2026. No other file changed.
+
 * Fri Oct 16 2026 mzak <mzak.amin@gmail.com> - 11.A.38-4
 - Add the sensor hub registry (/usr/share/qcom/kaanapali/OnePlus/iceland/sensors/registry, 352 files from
   persist:/sensors/registry/registry of 11.A.38, sha256 in MANIFEST.tsv): generic by the owner's decision of

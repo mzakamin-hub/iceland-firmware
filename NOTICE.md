@@ -10,6 +10,12 @@ redistributed UNMODIFIED, with these documented, byte-exact transformations only
   byte-identical.
 - `socinfo/*`: SoC identification values (stock `/sys/devices/soc0`), not vendor code.
 
+Since 11.A.38-5 the package also carries stock's GPU GMU firmware and SQE microcode (`gen80200_gmu.bin` v5.3.39,
+`gen80200_sqe.fw` 0x103; Qualcomm Technologies, Inc.), byte copies of `vendor_a:/firmware/` of 11.A.38, in
+`/usr/lib/firmware/iceland-gpu-stock/qcom/`. They do not replace the copies of Fedora's linux-firmware package, which
+keep their own notice (`WHENCE` / `LICENSE.qcom` of linux-firmware); the kernel uses stock's pair only when its
+command line has `firmware_class.path=/usr/lib/firmware/iceland-gpu-stock`.
+
 One file is not a byte copy: `/etc/iceland/thermal-model.json`, stock's shell-temperature model (the input of
 iceland-thermal), decoded from the vendor's encrypted thermal configuration of 11.A.38. It is generic:
 identical on every unit (no serial, address or calibration field); only the models, the gear table and the status

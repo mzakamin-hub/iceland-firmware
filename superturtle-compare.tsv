@@ -9,8 +9,8 @@ novatek/novatek_nt36536_fw.bin	8af06234a9f4f779c341a3cecc0258bc4b0b1a3cc0884b9ea
 qca/gngbtfw20.mbn (ours: qca/brhbtfw20.mbn)	74ee832cd724fb6a4391bc06f4b0d9697d36b460e7f4b14fb6bc14b69e7cc287	74ee832cd724fb6a4391bc06f4b0d9697d36b460e7f4b14fb6bc14b69e7cc287	MATCH
 qca/gngbtnv20.bin (ours: qca/brhbtnv20.bin)	9671c2f0c1a860d0c4955e0427c51b0f8ae177b73fb2a933b838102a5f055698	9671c2f0c1a860d0c4955e0427c51b0f8ae177b73fb2a933b838102a5f055698	MATCH
 qcom/gen80200_aqe.fw	ed7916ca84e663d63fa94b0d40cc8c222e362e6cff860c539a8cca30d3721b68	-	THEIRS ONLY: Fedora qcom-firmware ships the GPU microcode (owner decision 2 Oct)
-qcom/gen80200_gmu.bin	06f4484fa06f91638aa4ae2412051bcddffdad69a7e2f83849c72412e6daa44d	-	THEIRS ONLY: Fedora qcom-firmware ships the GPU microcode (owner decision 2 Oct)
-qcom/gen80200_sqe.fw	e2d4e74282f50e40788b83b9ba4a5f5894c7975ed356c03a0161372d78f12932	-	THEIRS ONLY: Fedora qcom-firmware ships the GPU microcode (owner decision 2 Oct)
+qcom/gen80200_gmu.bin	06f4484fa06f91638aa4ae2412051bcddffdad69a7e2f83849c72412e6daa44d	7e2f9381dbae6ba3eda632e51e07377a90a9549e2e164a033255ab4ecd431ba8	DIFFER: ours (11.A.38-5) = stock 11.A.38 GMU v5.3.39 in iceland-gpu-stock/qcom/; theirs = the vendor's v5.3.33
+qcom/gen80200_sqe.fw	e2d4e74282f50e40788b83b9ba4a5f5894c7975ed356c03a0161372d78f12932	1f1c7bae8050a9910902ec42b3d741ff3a68bc21114dea966a502ade2a9b606d	DIFFER: ours (11.A.38-5) = stock 11.A.38 SQE 0x103 in iceland-gpu-stock/qcom/; theirs = the vendor's 0x094
 qcom/kaanapali/OnePlus-Pad4-tplg.bin	11b78ff1037690499ecbc539d2ca19cde8ca0a86f62e6df00083fb88b0e967c7	-	THEIRS ONLY: ALSA topology: built from source by iceland-device
 qcom/kaanapali/iceland/adsp.mbn	75c4de7550088bf3cff68e87448fb16e95f3a48121be2acb526b2cd99b8fcfa6	781512dbb6d9958d7e7eb50862000db867bea9e8b0e27cad87ffc94c6bc536af	DIFFER (15 of 50 segments equal)
 qcom/kaanapali/iceland/adsp_dtb.mbn	e15bee4c704d85d93a791896ca4df2fa48dc214429e538184d21b60efdd904b0	09e35c4294fd3b3d25146603538c5e858af7e13a5d60a639f495783d397c448a	DIFFER (bytes) / segments MATCH
