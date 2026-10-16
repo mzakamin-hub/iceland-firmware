@@ -1,0 +1,1 @@
+{"qsh_camera.tuning_params.nms_hd":{"owner":"qsh_camera","confidence_threshold":{"type":"flt","ver":"0","data":"10"},"iou_threshold":{"type":"flt","ver":"0","data":"0.5"},"max_num_output_hands":{"type":"int","ver":"0","data":"4"},"max_proposals":{"type":"int","ver":"0","data":"50"},"is_island":{"type":"int","ver":"0","data":"0"},"is_used":{"type":"int","ver":"0","data":"1"}}}

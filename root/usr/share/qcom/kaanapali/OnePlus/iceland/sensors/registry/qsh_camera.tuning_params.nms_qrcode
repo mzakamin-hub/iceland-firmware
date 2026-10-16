@@ -1,0 +1,1 @@
+{"qsh_camera.tuning_params.nms_qrcode":{"owner":"qsh_camera","confidence_threshold_qr":{"type":"int","ver":"0","data":"-21"},"confidence_threshold_bar":{"type":"int","ver":"0","data":"-21"},"confidence_threshold_ttcode":{"type":"int","ver":"0","data":"-21"},"is_island":{"type":"int","ver":"0","data":"1"},"is_used":{"type":"int","ver":"0","data":"1"}}}

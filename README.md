@@ -7,23 +7,26 @@ taken from the stock software release 11.A.38 and packaged for Fedora as `icelan
 
 | Version | Tag / commit | What changed | RPM sha256 prefix |
 |---|---|---|---|
-| **11.A.38-3** (current) | `11.A.38-3` / `70ea8f1` | adds `/etc/iceland/thermal-model.json` (sha256 `4f476a7d4b0b9c5266aacd83d430f454e6175922f0c1c21f9f9dfd0a36f1debd`) | `297669a0` |
+| **11.A.38-4** (current) | `11.A.38-4` | adds the sensor hub registry (352 files, `sensors/registry`, generic per the owner's decision of 15 Oct 2026) | see the release |
+| 11.A.38-3 | `11.A.38-3` / `70ea8f1` | adds `/etc/iceland/thermal-model.json` (sha256 `4f476a7d4b0b9c5266aacd83d430f454e6175922f0c1c21f9f9dfd0a36f1debd`) | `297669a0` |
 | 11.A.38-2 | `11.A.38-2` / `c40c33e` | the 278 generic firmware files, the sensor hub tree with its permissions (root:fastrpc) | `14833f71` |
 
 The 11.A.38-3 file is stock's shell-temperature model for `iceland-thermal`. It was decoded from the vendor's encrypted
 thermal configuration of 11.A.38. It is generic and the same on every unit (no serial, address or calibration value).
 It is published since 12 Oct 2026. The firmware files themselves are the same in -2 and -3.
 
-11.A.38-3 is the release in the project's Fedora 44 install image.
+11.A.38-3 is the release in the project's installed Fedora 44 system; 11.A.38-4 is the one for the generic install image.
+The registry files of 11.A.38-4 are `%config(noreplace)`: a registry the installer's extractor wrote from a unit's own
+persist partition is kept.
 
 ## Contents
 
-- `root/`: the files, laid out as they are installed. 279 files, 129,208,105 bytes (about 123 MiB) in all. The largest
+- `root/`: the files, laid out as they are installed. 631 files, 129,328,160 bytes (about 123 MiB) in all. The largest
   is `adsp.mbn` (40,814,792 bytes):
   - `/usr/lib/firmware/updates/`: the ADSP and CDSP images, the GPU zap shader, the video (VPU) firmware, the
     WCN7860 Wi-Fi and Bluetooth firmware and board files, and the Novatek touch firmware;
   - `/usr/share/qcom/kaanapali/OnePlus/iceland/`: the sensor hub's file tree (DSP libraries, sensor configuration and
-    the audio calibration database), without the sensor calibration registry;
+    the audio calibration database) and, since 11.A.38-4, the sensor hub registry (`sensors/registry`, 352 files);
   - `/etc/iceland/thermal-model.json`: the thermal model (11.A.38-3 only).
 - `iceland-firmware.spec`: the RPM spec. It has no scriptlets and no services. Only the `fastrpc` group is required.
 - `MANIFEST.tsv`: one row per packaged file: path, sha256, bytes, class, the stock source (partition and path in
@@ -41,8 +44,7 @@ of any file is used, compare its sha256 with `MANIFEST.tsv`.
 
 `EXCLUDED.tsv` lists what is never packaged. It is data of one unit, or an input of the vendor's own programs:
 
-- the sensor calibration registry of the unit, the Bluetooth address and the record of the extraction (the installer
-  still writes them from the tablet);
+- the Bluetooth address and the record of the extraction (the installer still writes them from the tablet);
 - the vendor's encrypted thermal configuration files, the vendor's thermal program and its key, the tool that decodes
   them, and the full decoded configuration (only the narrower model in `thermal-model.json` is published);
 - persist and modem data, partition backups, camera traces and test media.

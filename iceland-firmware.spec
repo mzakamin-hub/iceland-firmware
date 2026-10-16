@@ -2,8 +2,11 @@
 # iceland-firmware: the GENERIC firmware of the OnePlus Pad 4 (OPD2514, stock 11.A.38) at the paths the installer's
 # extractor (iceland-fw-extract) writes today, so those files become package-owned with no gap: the package's files
 # are byte-identical to the extracted ones (MANIFEST.tsv = the extraction's sha256), rpm replaces an unowned file
-# with the same content in place, so nothing is ever absent. Unit-specific data (the sensor registry from persist,
-# the Bluetooth address, the extraction record) is NOT in this package (EXCLUDED.tsv) and stays extractor-written.
+# with the same content in place, so nothing is ever absent. Unit-specific data (the Bluetooth address, the
+# extraction record) is NOT in this package (EXCLUDED.tsv) and stays extractor-written.
+# 11.A.38-4 adds the sensor hub registry (persist:/sensors/registry/registry, 352 files): generic by the owner's
+# decision of 15 Oct 2026. Its files are %config(noreplace): a registry the extractor wrote from a unit's own persist
+# partition stays in place (rpm writes .rpmnew next to a differing file) and rpm -V reports it as configuration.
 # 11.A.38-3 adds ONE non-firmware file: /etc/iceland/thermal-model.json, stock's shell-temperature model for
 # iceland-thermal (decoded from the vendor's encrypted horae configs, generic; owner's decision 12 Oct 2026). A plain
 # package file, NOT %config: the installer no longer writes it, rpm replaces an unowned copy of the same bytes, and an
@@ -22,7 +25,7 @@
 
 Name:           iceland-firmware
 Version:        11.A.38
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Generic firmware of the OnePlus Pad 4 (Snapdragon 8 Elite Gen 5 / kaanapali)
 License:        LicenseRef-Callaway-Redistributable-no-modification-permitted
 URL:            https://github.com/mzakamin-hub/iceland-firmware
@@ -45,7 +48,8 @@ sensor hub's file tree (DSP libraries, sensor configuration, audio calibration d
 the iceland-device package expect them. MANIFEST.tsv lists each file's stock source and sha256.
 Also stock's shell-temperature model for iceland-thermal (/etc/iceland/thermal-model.json), decoded from the
 vendor's thermal configuration: generic, the same on every unit.
-Unit-specific data (sensor calibration registry, Bluetooth / Wi-Fi addresses) is not included.
+Also the sensor hub registry of stock 11.A.38 (generic; configuration files, a unit's own registry is kept).
+Unit-specific data (Bluetooth / Wi-Fi addresses) is not included.
 
 %prep
 %setup -q -n iceland-firmware-%{version}
@@ -56,11 +60,12 @@ Unit-specific data (sensor calibration registry, Bluetooth / Wi-Fi addresses) is
 %install
 cp -a root/. %{buildroot}/
 # the file list = exactly MANIFEST.tsv, plus every directory below /usr/lib/firmware and /usr/share that holds one of
-# its files; the sensor registry directory (persist, private) is never listed
+# its files; the sensor registry files are %config(noreplace)
 awk -F'\t' '!/^#/ && NF >= 2 { print $1 }' MANIFEST.tsv | sort > files.txt
 : > %{name}.files
 T=/usr/share/qcom/kaanapali/OnePlus/iceland
-while read -r f; do case "$f" in "$T"/*) printf '%%%%attr(0640,root,fastrpc) "%%s"\n' "$f" ;; *) printf '"%%s"\n' "$f" ;; esac; done < files.txt >> %{name}.files
+while read -r f; do case "$f" in "$T"/sensors/registry/*) printf '%%%%config(noreplace) %%%%attr(0640,root,fastrpc) "%%s"
+' "$f" ;; "$T"/*) printf '%%%%attr(0640,root,fastrpc) "%%s"\n' "$f" ;; *) printf '"%%s"\n' "$f" ;; esac; done < files.txt >> %{name}.files
 python3 - files.txt >> %{name}.files <<'PY'
 import sys
 dirs = set()
@@ -80,7 +85,7 @@ PY
 cd %{buildroot}
 awk -F'\t' '!/^#/ && NF >= 2 { print $2 "  ." $1 }' %{_builddir}/iceland-firmware-%{version}/MANIFEST.tsv | sha256sum --quiet -c -
 test "$(find . -type f | wc -l)" = "$(grep -c -v '^#' %{_builddir}/iceland-firmware-%{version}/MANIFEST.tsv)"
-test ! -e ./usr/share/qcom/kaanapali/OnePlus/iceland/sensors/registry
+test "$(find ./usr/share/qcom/kaanapali/OnePlus/iceland/sensors/registry -type f | wc -l)" = 352
 # the thermal model: valid JSON with the five shell models; nothing else under /etc
 python3 -c 'import json, sys; d = json.load(open(sys.argv[1])); sys.exit(0 if len(d.get("models", [])) == 5 else 1)' ./etc/iceland/thermal-model.json
 test "$(find ./etc -type f | wc -l)" = 1
@@ -90,6 +95,12 @@ test "$(find ./etc -type f | wc -l)" = 1
 %doc README.md MANIFEST.tsv EXCLUDED.tsv
 
 %changelog
+* Fri Oct 16 2026 mzak <mzak.amin@gmail.com> - 11.A.38-4
+- Add the sensor hub registry (/usr/share/qcom/kaanapali/OnePlus/iceland/sensors/registry, 352 files from
+  persist:/sensors/registry/registry of 11.A.38, sha256 in MANIFEST.tsv): generic by the owner's decision of
+  15 Oct 2026, so a generic install image needs no per-unit extraction. %config(noreplace): a registry written
+  from a unit's own persist partition stays. Firmware files and the thermal model unchanged.
+
 * Mon Oct 12 2026 mzak <mzak.amin@gmail.com> - 11.A.38-3
 - Add /etc/iceland/thermal-model.json (sha256 4f476a7d): stock's shell-temperature model for iceland-thermal,
   decoded from the vendor's encrypted thermal configuration of 11.A.38; generic, identical on every unit (owner's

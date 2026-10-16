@@ -1,0 +1,1 @@
+{"default_sensors.persist_stationary_detect.attr_0":{"owner":"suid","id":{"type":"int","ver":"0","data":"0"},"val":{"type":"str","ver":"0","data":"ccd_psd"}}}

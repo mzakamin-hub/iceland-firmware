@@ -1,0 +1,1 @@
+{"devinfo.als":{"owner":"NA","cal_path":{"type":"str","ver":"0","data":"alsps_platform.als.fac_cal"}}}

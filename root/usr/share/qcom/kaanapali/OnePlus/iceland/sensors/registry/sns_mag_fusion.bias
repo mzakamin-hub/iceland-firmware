@@ -1,0 +1,1 @@
+{"sns_mag_fusion.bias":{"owner":"mag_fusion","accuracy":{"type":"int","ver":"124","data":"1"},"bias_0":{"type":"flt","ver":"124","data":"-0.6642"},"bias_1":{"type":"flt","ver":"124","data":"-0.6852"},"bias_2":{"type":"flt","ver":"124","data":"0.8292"}}}
