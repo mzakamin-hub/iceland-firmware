@@ -1,80 +1,68 @@
 # iceland-firmware
 
-Generic firmware of the OnePlus Pad 4 (OPD2514, "iceland"; Snapdragon 8 Elite Gen 5 / kaanapali) for mainline Linux,
-taken from the stock software release 11.A.38 and packaged for Fedora as `iceland-firmware` (noarch).
+Generic firmware of the OnePlus Pad 4 (OPD2514, `iceland`; Snapdragon 8 Elite Gen 5, kaanapali) for mainline Linux. The
+files are taken from the stock software release 11.A.38 and packaged for Fedora as the `iceland-firmware` RPM (noarch).
 
-## Releases
+The package holds the generic files only. Unit-specific data is never packaged; [EXCLUDED.tsv](EXCLUDED.tsv) lists what
+is left out. The hub explains where the firmware is used:
+[iceland-mainline](https://github.com/mzakamin-hub/iceland-mainline#boot-chain).
 
-| Version | Tag / commit | What changed | RPM sha256 prefix |
-|---|---|---|---|
-| **11.A.38-6** (current) | `11.A.38-6` / `77a14c2` | adds the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094 (as SuperTurtleDev / the TB323FU port) in `/usr/lib/firmware/iceland-gpu-vendor533/qcom`, used with GPU preemption on (see below) | `f8e202b3` |
-| 11.A.38-5 | `11.A.38-5` / `f6fc0cd` | adds stock's GPU GMU firmware v5.3.39 and SQE microcode 0x103 in `/usr/lib/firmware/iceland-gpu-stock/qcom` (used with `firmware_class.path`, see below) | `8e430110` |
-| 11.A.38-4 | `11.A.38-4` / `5305629` | adds the sensor hub registry (352 files, `sensors/registry`, generic per the owner's decision of 15 Oct 2026) | `fb86f5fa` |
-| 11.A.38-3 | `11.A.38-3` / `70ea8f1` | adds `/etc/iceland/thermal-model.json` (sha256 `4f476a7d4b0b9c5266aacd83d430f454e6175922f0c1c21f9f9dfd0a36f1debd`) | `297669a0` |
-| 11.A.38-2 | `11.A.38-2` / `c40c33e` | the 278 generic firmware files, the sensor hub tree with its permissions (root:fastrpc) | `14833f71` |
+## Current release
 
-The 11.A.38-3 file is stock's shell-temperature model for `iceland-thermal`. It was decoded from the vendor's encrypted
-thermal configuration of 11.A.38. It is generic and the same on every unit (no serial, address or calibration value).
-It is published since 12 Oct 2026. The firmware files themselves are the same in -2 and -3.
+The [`11.A.38-6` release](https://github.com/mzakamin-hub/iceland-firmware/releases/tag/11.A.38-6) has
+`iceland-firmware-11.A.38-6.fc44.noarch.rpm`, its source RPM and `SHA256SUMS`. The RPM's SHA-256 starts `f8e202b3`.
+Check the files with `sha256sum -c SHA256SUMS`.
 
-11.A.38-6 is the release for the installed Fedora 44 system (with `iceland-device` 0.28-20) and the generic install
-image from B150 on; 11.A.38-3 to -5 are earlier ones.
-The registry files of 11.A.38-4 are `%config(noreplace)`: a registry the installer's extractor wrote from a unit's own
-persist partition is kept.
+| Tag | What it added |
+|---|---|
+| 11.A.38-6 (current) | the vendor GPU firmware pair, GMU v5.3.33 and SQE 0x094 (a third-party copy, see below) |
+| 11.A.38-5 | stock's GPU firmware pair, GMU v5.3.39 and SQE 0x103 |
+| 11.A.38-4 | the sensor hub registry (`sensors/registry`, 352 files) |
+| 11.A.38-3 | the decoded thermal model, `/etc/iceland/thermal-model.json` |
+| 11.A.38-2 | the generic firmware files and the sensor hub tree |
 
 ## Contents
 
-- `root/`: the files, laid out as they are installed. 635 files, 129,793,088 bytes (about 124 MiB) in all. The largest
-  is `adsp.mbn` (40,814,792 bytes):
-  - `/usr/lib/firmware/updates/`: the ADSP and CDSP images, the GPU zap shader, the video (VPU) firmware, the
-    WCN7860 Wi-Fi and Bluetooth firmware and board files, and the Novatek touch firmware;
-  - `/usr/share/qcom/kaanapali/OnePlus/iceland/`: the sensor hub's file tree (DSP libraries, sensor configuration and
-    the audio calibration database) and, since 11.A.38-4, the sensor hub registry (`sensors/registry`, 352 files);
-  - `/usr/lib/firmware/iceland-gpu-stock/qcom/`: stock's GPU GMU firmware (`gen80200_gmu.bin` v5.3.39) and SQE
-    microcode (`gen80200_sqe.fw` 0x103), since 11.A.38-5 (see below);
-  - `/usr/lib/firmware/iceland-gpu-vendor533/qcom/`: the vendor GPU GMU firmware v5.3.33 and SQE microcode 0x094,
-    since 11.A.38-6 (third-party copies, see below);
-  - `/etc/iceland/thermal-model.json`: the thermal model (since 11.A.38-3).
+- `root/`: the files, laid out as they are installed:
+  - `/usr/lib/firmware/updates/`: the ADSP and CDSP images, the GPU zap shader, the video (VPU) firmware, the WCN7860
+    Wi-Fi and Bluetooth firmware and board files, and the Novatek touch firmware;
+  - `/usr/share/qcom/kaanapali/OnePlus/iceland/`: the sensor hub's file tree (DSP libraries, sensor configuration and the
+    audio calibration database) and the sensor hub registry;
+  - `/usr/lib/firmware/iceland-gpu-stock/qcom/` and `/usr/lib/firmware/iceland-gpu-vendor533/qcom/`: the two GPU pairs
+    (see below);
+  - `/etc/iceland/thermal-model.json`: stock's shell-temperature model, decoded (see below).
 - `iceland-firmware.spec`: the RPM spec. It has no scriptlets and no services. Only the `fastrpc` group is required.
-- `MANIFEST.tsv`: one row per packaged file: path, sha256, bytes, class, the stock source (partition and path in
-  11.A.38), the transformation, the notice, and the comparison with the copy in SuperTurtleDev's
-  [iceland-mainline-kernel-firmware](https://github.com/SuperTurtleDev/iceland-mainline-kernel-firmware) repository.
-- `EXCLUDED.tsv`: the unit-specific data and the inputs that are never published (see below).
+- `MANIFEST.tsv`: one row per packaged file: path, sha256, size, class, the stock source (partition and path in 11.A.38),
+  the transformation, the notice, and the comparison with SuperTurtleDev's firmware repository.
+- `EXCLUDED.tsv`: what is never packaged.
 - `superturtle-compare.tsv`: the file-by-file comparison with that third-party repository.
-- `NOTICE.md` and `Notice-qca-atheros.txt`: the notices (see below).
+- `NOTICE.md` and `Notice-qca-atheros.txt`: the notices.
 
-Every file except the vendor GPU pair of 11.A.38-6 is byte-identical to what the project's extractor
-(`iceland-fw-extract`, not published) writes from a tablet's own stock partitions. `sha256sum -c` against `MANIFEST.tsv` proves it. Before a third-party copy
-of any file is used, compare its sha256 with `MANIFEST.tsv`.
+Each stock file is a byte copy of its source in 11.A.38, except for the transformations listed in [NOTICE.md](NOTICE.md).
+The vendor GPU pair is a third-party copy. Before you use a copy of any file from another source, compare its sha256
+with the value in `MANIFEST.tsv`.
 
-## Stock's GPU firmware (11.A.38-5)
+## The sensor hub registry
 
-Fedora's linux-firmware ships the Adreno 840 GPU's GMU firmware v5.3.23 and SQE microcode 0x088. Stock 11.A.38 runs
-GMU v5.3.39 / SQE 0x103, the pair the GPU was validated with. With stock's pair the RAM rehearsal R4 (16 Oct 2026,
-kernel q89m, GPU preemption off) started the GPU
-cleanly (0 GMU errors, 0 fenced writes, Chromium WebGL 180 s without a GPU-process crash, vkmark 23613).
+Since 11.A.38-4 the package includes the sensor hub registry (`sensors/registry`). Its files are installed as
+`%config(noreplace)`: a registry that the installer's extractor wrote from a unit's own `persist` partition is kept.
 
-Stock's pair is installed in its own directory, `/usr/lib/firmware/iceland-gpu-stock/qcom/`, which the kernel does
-not search by default; linux-firmware's files are not replaced. The kernel parameter
-`firmware_class.path=/usr/lib/firmware/iceland-gpu-stock` makes the kernel look there first. `iceland-device`
-0.28-19 sets it (switch `GPU_FW=stock|linux-firmware` in `/etc/iceland/boot.conf`) and puts the pair into the
-initramfs.
+## The two GPU firmware pairs
 
-## The vendor GPU firmware (11.A.38-6)
+The GPU firmware comes in two pairs, each in its own directory. The kernel does not search these directories by default.
+`iceland-device` sets the search path and chooses the pair with `GPU_FW` in `/etc/iceland/boot.conf`.
 
-SuperTurtleDev's port and the Lenovo TB323FU port (the same Snapdragon 8 Elite Gen 5) run the GPU with the vendor
-pair GMU v5.3.33 / SQE 0x094 and GPU preemption on. Stock 11.A.38 does not ship this pair; the files here are
-third-party copies, byte-identical in SuperTurtleDev/iceland-mainline-kernel-firmware d0c0f18,
-map220v/iceland-firmware da6a19a and the TB323FU manifest (ZUI 18.0.12.104; joonhoekim/tb323fu-linux 43ee432);
-`MANIFEST.tsv` has their sha256. In the RAM rehearsal P2 (16 Oct 2026, kernel q89m, `msm.enable_preemption=1`)
-the GPU made 48356 preemption ring switches with 0 fenced-write failures, 0 preemption timeouts and 0 faults or
-recoveries; Chromium WebGL ran without a GPU-process crash, vkmark 22112. Stock's pair with preemption on reset the
-tablet early in boot (P1), so stock's pair is used only with preemption off.
+- **Stock's pair**, GMU v5.3.39 and SQE 0x103, from 11.A.38. It is used only with GPU preemption off: in testing, stock's
+  pair with preemption on reset the tablet early in boot.
+- **The vendor pair**, GMU v5.3.33 and SQE 0x094, as used by other ports of this chip. Stock 11.A.38 does not ship it.
+  The files are third-party copies, byte-identical in SuperTurtleDev/iceland-mainline-kernel-firmware,
+  map220v/iceland-firmware and the TB323FU manifest (ZUI 18.0.12.104). `MANIFEST.tsv` has their sha256 values.
 
-The pair is installed in `/usr/lib/firmware/iceland-gpu-vendor533/qcom/`, also off the kernel's default search
-path. `iceland-device` 0.28-20 selects it by default (`GPU_FW=vendor533` in `/etc/iceland/boot.conf`:
-`firmware_class.path=/usr/lib/firmware/iceland-gpu-vendor533` and `msm.enable_preemption=1`) and puts both pairs
-into the initramfs.
+## The decoded thermal model
+
+`/etc/iceland/thermal-model.json` is stock's shell-temperature model, the input of `iceland-thermal`. It was decoded from
+the vendor's encrypted thermal configuration of 11.A.38. It is generic and the same on every unit: it has no serial,
+address or calibration value. The encrypted inputs, the key and the decoder are not published ([NOTICE.md](NOTICE.md)).
 
 ## Not in this repository
 
@@ -95,12 +83,15 @@ byte-exact transformations (see [NOTICE.md](NOTICE.md)):
   byte-identical to the stock files);
 - `novatek_nt36536_fw.bin`: the stock container's header and trailer are removed; the payload is byte-identical;
 - `socinfo/*`: SoC identification values, not vendor code.
+- `/etc/iceland/thermal-model.json`: not a byte copy; stock's thermal model, decoded (see above).
 
 All rights remain with their owners. No licence is granted beyond the right to use the files with OnePlus Pad 4
 hardware as the owners permit.
 
+`Notice-qca-atheros.txt` is Qualcomm Atheros' notice file for the WCN7860 Wi-Fi firmware.
+
 ## Related repositories
 
 - [iceland-linux](https://github.com/mzakamin-hub/iceland-linux): the kernel that loads these files.
-- [iceland-u-boot](https://github.com/mzakamin-hub/iceland-u-boot): the bootloader.
-- [iceland-mainline](https://github.com/mzakamin-hub/iceland-mainline): the project, the extractor and the install guide.
+- [iceland-u-boot](https://github.com/mzakamin-hub/iceland-u-boot): the boot loader.
+- [iceland-mainline](https://github.com/mzakamin-hub/iceland-mainline): the project, the install guide and the device package.
